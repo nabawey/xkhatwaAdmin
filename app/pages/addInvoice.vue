@@ -1,319 +1,258 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard' })
+definePageMeta({ layout: 'dashboard' });
+import { ref, reactive, computed, onBeforeUpdate } from 'vue';
 
-// --- Types ---
-interface Product {
-  id: number
-  name: string
-  price: number
+interface Invoice {
+  CustomerName: string;
+  InvoiceDate: string;
+  Discount: number;
+  Notes: string;
 }
 
-interface LineItem {
-  id: string | number
-  productId: number
-  quantity: number
-  unitPrice: number
-  lineTotal: number
+interface InvoiceDetail {
+  ProductID: number | null;
+  Quantity: number;
+  UnitPrice: number;
 }
 
-// --- Mock Data ---
-const products: Product[] = [
-  { id: 1, name: 'Product A', price: 50 },
-  { id: 2, name: 'Product B', price: 120 },
-  { id: 3, name: 'Product C', price: 75 },
-  { id: 4, name: 'Service X', price: 200 }
-]
+// --- State ---
+const header = reactive<Invoice>({
+  CustomerName: '',
+  InvoiceDate: new Date().toISOString().split('T')[0] ?? '',
+  Discount: 0,
+  Notes: ''
+});
 
-const defaultProduct = products[0]!
+const details = ref<InvoiceDetail[]>([
+  { ProductID: null, Quantity: 1, UnitPrice: 0 }
+]);
 
-// --- Unified State ---
-const header = reactive({
-  date: new Date().toISOString().slice(0, 16),
-  customer: '',
-  phone: '',
-  seller: '',
-  notes: ''
-})
+const errors = ref<string[]>([]);
+const isSubmitting = ref(false);
 
-const details = ref<LineItem[]>([
-  {
-    id: useId(), 
-    productId: defaultProduct.id,
-    quantity: 1,
-    unitPrice: defaultProduct.price,
-    lineTotal: defaultProduct.price
+// --- Product Database Logic ---
+const productDb: Record<number, number> = { 1: 50, 2: 100, 3: 150 };
+
+/**
+ * Direct update handler for Unit Price based on ProductID
+ */
+const updatePrice = (index: number) => {
+  const row = details.value[index] ?? { ProductID: null, UnitPrice: 0 };
+  if (row.ProductID && productDb[row.ProductID]) {
+    row.UnitPrice = productDb[row.ProductID] ?? 0;
+  } else {
+    row.UnitPrice = 0;
   }
-])
+};
 
-const discountValue = ref<number>(0)
+// --- Keyboard Navigation Logic ---
+const inputs = ref<HTMLElement[]>([]);
+const setInputRef = (el: any) => { if (el) inputs.value.push(el); };
+onBeforeUpdate(() => { inputs.value = []; });
 
-// Configuration for Header loop
-const headerFields = [
-  { id: 'date', label: 'Date', type: 'datetime-local' },
-  { id: 'customer', label: 'Customer Name', type: 'text' },
-  { id: 'phone', label: 'Phone', type: 'tel' },
-  { id: 'seller', label: 'Seller Name', type: 'text' },
-  { id: 'notes', label: 'Notes', type: 'text' }
-] as const
-
-const headerOrder: string[] = headerFields.map(f => f.id)
-
-// --- Focus Management ---
-const formRefs = ref<Record<string, HTMLElement | null>>({})
-
-const setRef = (key: string) => (el: any) => {
-  if (el) formRefs.value[key] = el.$el ?? el
-}
-
-const focusField = (key: string) => {
-  formRefs.value[key]?.focus()
-}
+const handleNav = (index: number, e: KeyboardEvent) => {
+  // ArrowRight or Enter moves forward
+  if (e.key === 'ArrowRight' || (e.key === 'Enter' && e.target instanceof HTMLInputElement)) {
+    if (index < inputs.value.length - 1) {
+      e.preventDefault();
+      inputs.value[index + 1]?.focus();
+    }
+  }
+  // ArrowLeft moves backward
+  else if (e.key === 'ArrowLeft') {
+    if (index > 0) {
+      e.preventDefault();
+      inputs.value[index - 1]?.focus();
+    }
+  }
+};
 
 // --- Calculations ---
-const subtotal = computed(() => 
-  details.value.reduce((acc, item) => acc + item.lineTotal, 0)
-)
+const subtotal = computed(() => details.value.reduce((acc, row) => acc + (row.Quantity * row.UnitPrice), 0));
+const totalPrice = computed(() => Math.max(0, subtotal.value - header.Discount));
 
-const totalAmount = computed(() => {
-  const sub = subtotal.value
-  const disc = Number(discountValue.value) || 0
-  return Math.max(0, sub - disc)
-})
+// --- Row Management ---
+const addRow = () => {
+  details.value.push({ ProductID: null, Quantity: 1, UnitPrice: 0 });
+};
 
-// --- Methods ---
-const updateLine = (index: number) => {
-  const item = details.value[index]
-  if (!item) return
+const removeRow = (index: number) => {
+  if (details.value.length > 1) details.value.splice(index, 1);
+};
 
-  const product = products.find(p => p.id === item.productId)
-  if (product) {
-    item.unitPrice = product.price
-    item.lineTotal = Number((item.quantity * item.unitPrice).toFixed(2))
+// --- Validation ---
+const validateForm = () => {
+  errors.value = [];
+  if (!header.CustomerName.trim()) errors.value.push("Customer Name is required.");
+
+  details.value.forEach((item, idx) => {
+    if (!item.ProductID) errors.value.push(`Row ${idx + 1}: Product ID is required.`);
+    if (item.Quantity <= 0) errors.value.push(`Row ${idx + 1}: Quantity must be greater than 0.`);
+  });
+
+  return errors.value.length === 0;
+};
+
+const submitInvoice = async () => {
+  if (!validateForm()) return;
+
+  isSubmitting.value = true;
+  try {
+    console.log("Submitting Invoice Payload:", { header, details: details.value, total: totalPrice.value });
+    await new Promise(r => setTimeout(r, 1000));
+    alert("Invoice Saved Successfully!");
+  } catch (e) {
+    errors.value.push("Failed to save invoice. Please try again.");
+  } finally {
+    isSubmitting.value = false;
   }
-}
-
-const addDetail = async () => {
-  details.value.push({
-    id: Math.random().toString(36).slice(2),
-    productId: defaultProduct.id,
-    quantity: 1,
-    unitPrice: defaultProduct.price,
-    lineTotal: defaultProduct.price
-  })
-  
-  await nextTick()
-  // Focus the product dropdown of the newly added row
-  focusField(`row-${details.value.length - 1}-col-0`)
-}
-
-const removeDetail = (index: number) => {
-  if (details.value.length > 1) {
-    details.value.splice(index, 1)
-  }
-}
-
-// --- Keyboard Navigation ---
-const onHeaderKeydown = (e: KeyboardEvent, currentField: string) => {
-  const idx = headerOrder.indexOf(currentField)
-
-  if (e.key === 'ArrowRight') {
-    const next = headerOrder[idx + 1]
-    if (next) {
-      e.preventDefault()
-      focusField(next)
-    } else {
-      e.preventDefault()
-      focusField('row-0-col-0') // Jump to table
-    }
-  } else if (e.key === 'ArrowLeft') {
-    const prev = headerOrder[idx - 1]
-    if (prev) {
-      e.preventDefault()
-      focusField(prev)
-    }
-  }
-}
-
-const onTableKeydown = (e: KeyboardEvent, row: number, col: number) => {
-  const isLastRow = row === details.value.length - 1
-
-  if (e.key === 'ArrowRight') {
-    if (col === 0) {
-      e.preventDefault()
-      focusField(`row-${row}-col-1`)
-    } else if (col === 1) {
-      e.preventDefault()
-      if (!isLastRow) focusField(`row-${row + 1}-col-0`)
-      else focusField('discount-input')
-    }
-  } else if (e.key === 'ArrowLeft') {
-    if (col === 1) {
-      e.preventDefault()
-      focusField(`row-${row}-col-0`)
-    } else if (col === 0) {
-      e.preventDefault()
-      if (row > 0) focusField(`row-${row - 1}-col-1`)
-      else focusField('notes') // Jump back to header
-    }
-  } else if (e.key === 'Enter' && col === 1) {
-    e.preventDefault()
-    if (isLastRow) addDetail()
-    else focusField(`row-${row + 1}-col-0`)
-  }
-}
-
-const submitInvoice = () => {
-  console.log('Invoice Data:', { 
-    ...header, 
-    items: details.value, 
-    total: totalAmount.value 
-  })
-}
+};
 </script>
 
 <template>
-  <form @submit.prevent="submitInvoice" class="p-4 md:p-8 bg-[#0b1120] text-slate-200 rounded-lg shadow-xl max-w-7xl mx-auto">
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-10">
-      <div v-for="f in headerFields" :key="f.id">
-        <label class="text-[10px] font-bold uppercase text-slate-500 tracking-wider mb-2 block">
-          {{ f.label }}
-        </label>
-        <input 
-          :ref="setRef(f.id)"
-          v-model="header[f.id]" 
-          :type="f.type" 
-          @keydown="onHeaderKeydown($event, f.id)"
-          class="w-full bg-[#1e293b]/50 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 outline-none transition-all"
-          placeholder="..."
-        />
-      </div>
-    </div>
+  <div class="min-h-screen bg-black text-gray-200 p-4 sm:p-8">
+    <div class="max-w-6xl mx-auto">
 
-    <div class="overflow-x-auto scrollbar-hide mb-4">
-      <table class="w-full text-left min-w-[700px]">
-        <thead>
-          <tr class="text-[11px] font-bold text-slate-500 uppercase tracking-tight border-b border-slate-800">
-            <th class="pb-3 px-2">Product Selection</th>
-            <th class="pb-3 px-2 w-28 text-center">Quantity</th>
-            <th class="pb-3 px-2 w-28 text-right">Unit Price</th>
-            <th class="pb-3 px-2 w-32 text-right">Line Total</th>
-            <th class="pb-3 px-2 w-12"></th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-800/40">
-          <tr v-for="(item, i) in details" :key="item.id" class="group">
-            <td class="py-4 px-2">
-              <select 
-                :ref="setRef(`row-${i}-col-0`)"
-                v-model.number="item.productId" 
-                @change="updateLine(i)"
-                @keydown="onTableKeydown($event, i, 0)"
-                class="w-full bg-[#1e293b]/50 border border-slate-700 rounded p-2 text-sm focus:border-blue-500 outline-none appearance-none cursor-pointer"
-              >
-                <option v-for="p in products" :key="p.id" :value="p.id">{{ p.name }}</option>
-              </select>
-            </td>
-            <td class="py-4 px-2">
-              <input 
-                :ref="setRef(`row-${i}-col-1`)"
-                v-model.number="item.quantity" 
-                type="number" 
-                min="1"
-                @input="updateLine(i)"
-                @keydown="onTableKeydown($event, i, 1)"
-                class="w-full bg-[#1e293b]/50 border border-slate-700 rounded p-2 text-sm text-center outline-none focus:border-blue-500"
-              />
-            </td>
-            <td class="py-4 px-2 text-right text-sm italic text-slate-500 font-mono">
-              {{ item.unitPrice.toFixed(2) }}
-            </td>
-            <td class="py-4 px-2 text-right text-sm font-bold text-blue-400 font-mono">
-              {{ item.lineTotal.toFixed(2) }}
-            </td>
-            <td class="py-4 px-2 text-center">
-              <button 
-                type="button"
-                @click="removeDetail(i)" 
-                class="text-slate-600 hover:text-red-400 text-xl transition-colors p-1"
-                title="Remove Line"
-              >
-                &times;
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <button 
-      type="button" 
-      @click="addDetail" 
-      class="text-xs font-bold text-blue-400 hover:text-blue-300 mb-10 transition-colors flex items-center gap-1 group"
-    >
-      <span class="text-lg group-hover:scale-125 transition-transform">+</span> Add New Product Line
-    </button>
-
-    <div class="flex flex-col items-end border-t border-slate-800 pt-8">
-      <div class="w-full max-w-xs space-y-4">
-        
-        <div class="flex justify-between items-center text-sm">
-          <span class="text-slate-500 font-medium">Subtotal</span>
-          <span class="font-bold text-slate-200 font-mono tracking-tight">{{ subtotal.toFixed(2) }}</span>
+      <div class="mb-8 flex justify-between items-end">
+        <h1 class="text-3xl font-bold text-white tracking-tight">New Invoice</h1>
+        <div class="text-right">
+          <p class="text-sm text-gray-500 uppercase font-semibold">Grand Total</p>
+          <p class="text-4xl font-mono font-bold text-green-400">${{ totalPrice.toFixed(2) }}</p>
         </div>
+      </div>
 
-        <div class="flex justify-between items-center text-sm">
-          <span class="text-slate-500 font-medium">Discount Amount</span>
-          <div class="flex items-center gap-2">
-            <span class="text-red-500/50">-</span>
-            <input 
-              :ref="setRef('discount-input')"
-              v-model.number="discountValue" 
-              type="number" 
-              class="w-28 bg-[#1e293b]/50 border border-slate-700 rounded-md p-2 text-right text-sm text-red-400 outline-none focus:border-red-500"
-              placeholder="0.00"
-            />
+      <div v-if="errors.length" class="mb-6 p-4 bg-red-900/20 border border-red-500/50 rounded-xl">
+        <ul class="list-disc list-inside text-red-400 text-sm space-y-1">
+          <li v-for="err in errors" :key="err">{{ err }}</li>
+        </ul>
+      </div>
+
+      <form @submit.prevent="submitInvoice" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-900 p-6 rounded-2xl border border-gray-800">
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-500">CUSTOMER NAME</label>
+            <input :ref="setInputRef" v-model="header.CustomerName" type="text" @keydown="handleNav(0, $event)"
+              class="bg-black border border-gray-700 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 outline-none transition-all" />
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-500">DATE</label>
+            <input :ref="setInputRef" v-model="header.InvoiceDate" type="date" @keydown="handleNav(1, $event)"
+              class="bg-black border border-gray-700 rounded-lg px-4 py-2.5 [color-scheme:dark] focus:ring-2 focus:ring-green-500 outline-none" />
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="text-xs font-bold text-gray-500">SELLER</label>
+            <input value="Mohamed Nabwey" disabled
+              class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed" />
           </div>
         </div>
 
-        <div class="flex justify-between items-center pt-4 border-t border-slate-800/50">
-          <span class="text-slate-200 font-black uppercase text-xs tracking-widest">Grand Total</span>
-          <span class="text-2xl font-black text-emerald-400 font-mono tracking-tighter">
-            {{ totalAmount.toFixed(2) }}
-          </span>
+        <div class="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[600px]">
+              <thead class="bg-black/40 text-left">
+                <tr class="text-xs font-bold text-gray-500 border-b border-gray-800">
+                  <th class="px-6 py-4">PRODUCT ID</th>
+                  <th class="px-6 py-4">QTY</th>
+                  <th class="px-6 py-4">UNIT PRICE (AUTO)</th>
+                  <th class="px-6 py-4">LINE TOTAL</th>
+                  <th class="px-6 py-4 w-10"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, idx) in details" :key="idx"
+                  class="border-b border-gray-800/50 last:border-0 hover:bg-white/5 transition-colors">
+                  <td class="px-4 py-3">
+                    <input :ref="setInputRef" v-model.number="row.ProductID" type="number" placeholder="1, 2 or 3"
+                      @input="updatePrice(idx)" @keydown="handleNav(2 + (idx * 2), $event)"
+                      class="w-full bg-black border border-gray-700 rounded-lg px-3 py-2 focus:border-green-500 outline-none transition-colors" />
+                  </td>
+                  <td class="px-4 py-3">
+                    <input :ref="setInputRef" v-model.number="row.Quantity" type="number"
+                      @keydown="handleNav(2 + (idx * 2) + 1, $event)"
+                      class="w-full bg-black border border-gray-700 rounded-lg px-3 py-2 focus:border-green-500 outline-none transition-colors" />
+                  </td>
+                  <td class="px-6 py-3 text-gray-400 font-mono italic">
+                    ${{ row.UnitPrice.toFixed(2) }}
+                  </td>
+                  <td class="px-6 py-3 font-bold text-gray-300">
+                    ${{ (row.Quantity * row.UnitPrice).toFixed(2) }}
+                  </td>
+                  <td class="px-4 py-3">
+                    <button type="button" @click="removeRow(idx)"
+                      class="p-2 text-gray-600 hover:text-red-500 transition-colors" aria-label="Delete row">
+                      <Icon name="heroicons-outline:trash" class="w-5 h-5" />
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <button type="button" @click="addRow"
+            class="w-full py-4 bg-gray-800/30 hover:bg-gray-800 text-sm text-gray-400 border-t border-gray-800 transition-colors font-medium">
+            + Add Line Item
+          </button>
         </div>
 
-        <button 
-          type="submit" 
-          class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] mt-4"
-        >
-          Save & Finalize Invoice
-        </button>
-      </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <textarea v-model="header.Notes" placeholder="Additional notes or terms..."
+            class="w-full bg-gray-900 border border-gray-800 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-green-500/50 h-64 transition-all"></textarea>
+
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-400">Subtotal</span>
+              <span class="font-mono text-white">${{ subtotal.toFixed(2) }}</span>
+            </div>
+
+            <div class="flex justify-between items-center group">
+              <span class="text-sm text-red-500 font-bold uppercase tracking-tighter">Discount</span>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-red-500 font-bold">$</span>
+                <input :ref="setInputRef" v-model.number="header.Discount" type="number"
+                  @keydown="handleNav(inputs.length - 1, $event)"
+                  class="w-32 bg-black border border-red-900/50 rounded-lg pl-6 pr-3 py-1.5 text-right text-red-500 font-bold focus:ring-2 focus:ring-red-500 outline-none transition-all" />
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-800 flex justify-between items-center">
+              <span class="font-bold text-white">Payable</span>
+              <span class="text-2xl font-bold text-green-400 font-mono">${{ totalPrice.toFixed(2) }}</span>
+            </div>
+
+            <button type="submit" :disabled="isSubmitting"
+              class="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl shadow-lg shadow-green-900/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+              <Icon v-if="isSubmitting" name="svg-spinners:180-ring" class="mr-2" />
+              {{ isSubmitting ? 'PROCESSING...' : 'SAVE INVOICE' }}
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
-  </form>
+  </div>
 </template>
 
 <style scoped>
-/* Remove number input arrows */
+/* Remove standard number input arrows */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 input[type=number] {
   -moz-appearance: textfield;
 }
 
 /* Custom Scrollbar for the table */
-.scrollbar-hide::-webkit-scrollbar {
-  height: 4px;
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
 }
-.scrollbar-hide::-webkit-scrollbar-track {
-  background: #0f172a;
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #000;
 }
-.scrollbar-hide::-webkit-scrollbar-thumb {
-  background: #334155;
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #374151;
   border-radius: 10px;
 }
 </style>
