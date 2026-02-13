@@ -49,7 +49,7 @@ const columns: TableColumn<Invoice>[] = [
     { accessorKey: 'TotalAmount', header: 'Total Amount' },
     {
         header: 'Details',
-        cell: ({ row }) => h(AppShowDetailsButton , {
+        cell: ({ row }) => h(AppShowDetailsButton, {
             title: `Invoice #${row.original.InvoiceID} Details`,
             data: JSON.stringify(invoiceDetails.filter(detail => detail.InvoiceID === row.original.InvoiceID), null, 2)
         })
@@ -73,9 +73,14 @@ const paginated = computed(() =>
 </script>
 
 <template>
-    <AppPageHeader title="Invoices" description="A list of all the invoices in your account including their details."
-        buttonLabel="Add Invoice" :onButtonClick="() => console.log('Add Invoice clicked')" />
-
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+        <AppPageHeader title="Invoices"
+            description="A list of all the invoices in your account including their details." />
+        <NuxtLink href="/addInvoice">
+            <UButton label="Add New Invoice"
+                class="flex items-center justify-center rounded-md bg-green-800 hover:bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm w-full sm:w-auto" />
+        </NuxtLink>
+    </div>
 
     <AppDataTable :data="paginated" :columns="columns" :page-size="5" searchable />
 </template>
