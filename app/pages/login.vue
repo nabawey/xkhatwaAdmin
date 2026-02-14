@@ -1,10 +1,13 @@
+<script setup lang="ts">
+useHead({
+    title: 'Login'
+})
+</script>
 <template>
     <div class="@container flex h-screen bg-black">
         <div class="flex min-h-full min-w-full md:min-w-1/2 flex-1 flex-col justify-center px-6 py-12 lg:px-8">
             <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-                <img class="mx-auto h-40 w-auto"
-                    src="/xkhatwaLogo.png"
-                    alt="X Khatwa" />
+                <img class="mx-auto h-40 w-auto" src="/xkhatwaLogo.png" alt="X Khatwa" />
                 <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-white">Sign in to your account
                 </h2>
             </div>
@@ -39,14 +42,13 @@
                 <p class="mt-10 text-center text-sm/6 text-gray-400">
                     Not a member?
                     {{ ' ' }}
-                    <span class="font-semibold text-indigo-400 hover:text-indigo-300">Call Mr. Mohamed Nabawey for an account.</span>
+                    <span class="font-semibold text-indigo-400 hover:text-indigo-300">Call Mr. Mohamed Nabawey for an
+                        account.</span>
                 </p>
             </div>
         </div>
         <div class="flex-1">
-            <img class="hidden md:block w-full h-full"
-                src="/xKhatwaCover.jpg"
-                alt="" />
+            <img class="hidden md:block w-full h-full" src="/xkhatwaCover.jpg" alt="" />
         </div>
     </div>
 </template>

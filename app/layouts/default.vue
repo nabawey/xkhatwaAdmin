@@ -1,7 +1,7 @@
 <template>
-    <div class="flex min-h-screen bg-black text-white">
+    <div class="flex h-screen bg-black text-white">
         <!-- Main Content -->
-        <main class="flex-1 p-6">
+        <main class="flex-1">
             <NuxtPage />
         </main>
     </div>

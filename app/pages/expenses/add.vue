@@ -1,5 +1,8 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard' })
+definePageMeta({ layout: 'dashboard' });
+useHead({
+  title: 'Add Expense'
+})
 
 import { ref, reactive, onMounted } from 'vue';
 
@@ -64,7 +67,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-black p-4 sm:p-8">
+  <div class="bg-black p-4 sm:p-8">
     <div class="max-w-3xl mx-auto">
       
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">

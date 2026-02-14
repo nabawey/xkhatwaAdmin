@@ -18,4 +18,17 @@ export default defineNuxtConfig({
       tailwindcss(),
     ],
   },
+ app: {
+    head: {
+      title: 'X.Khatwa',
+      titleTemplate: '%s | X.Khatwa',
+      meta: [
+        { name: 'description', content: 'Internal Business Management Tool' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+      ],
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/shoeIco.png' }
+      ]
+    }
+  }
 })

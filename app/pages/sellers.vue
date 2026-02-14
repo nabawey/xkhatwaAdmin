@@ -1,6 +1,9 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'dashboard',
+});
+useHead({
+  title: 'Sellers'
 })
 
 import { ref, computed } from 'vue';
