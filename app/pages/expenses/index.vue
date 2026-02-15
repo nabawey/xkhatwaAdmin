@@ -1,12 +1,15 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard' });
-useHead({
-  title: 'Expenses'
-})
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
+definePageMeta({ layout: 'dashboard' });
+
+const { t } = useI18n();
 const router = useRouter()
+
+useHead({
+  title: t('expenses.list_title')
+})
 
 interface Expense {
   ExpenseID: number
@@ -22,14 +25,14 @@ const expenses: Expense[] = [
   { ExpenseID: 3, SellerID: 103, Details: 'Software Subscription', ExpenseDate: '2026-02-05', Amount: 99.99 }
 ]
 
-// Best Practice: Define column classes to handle width distribution
-const columns = [
-  { accessorKey: 'ExpenseID', header: 'ID', class: 'w-16' }, 
-  { accessorKey: 'Details', header: 'Description', class: 'min-w-[200px] flex-1' },
-  { accessorKey: 'ExpenseDate', header: 'Date', class: 'w-32 hidden sm:table-cell' }, // Hidden on tiny screens
-  { accessorKey: 'Amount', header: 'Amount', class: 'w-24 text-right' },
-  { accessorKey: 'actions', header: 'Actions', class: 'w-24 text-right' }
-]
+// Updated to computed so headers translate instantly
+const columns = computed(() => [
+  { accessorKey: 'ExpenseID', header: t('expenses.id'), class: 'w-16' }, 
+  { accessorKey: 'Details', header: t('expenses.details'), class: 'min-w-[200px] flex-1' },
+  { accessorKey: 'ExpenseDate', header: t('expenses.date'), class: 'w-32 hidden sm:table-cell' },
+  { accessorKey: 'Amount', header: t('expenses.amount'), class: 'w-24 text-right ps-4' },
+  { accessorKey: 'actions', header: t('common.actions'), class: 'w-24 text-right' }
+])
 
 const search = ref('')
 const filtered = computed(() =>
@@ -52,9 +55,9 @@ const handleUpdate = (id: number) => {
 <template>
   <div class="max-w-full overflow-hidden px-1">
     <AppPageHeader 
-      title="Expenses"
-      description="Track your business spending and seller payments."
-      buttonLabel="Add Expense" 
+      :title="t('expenses.list_title')"
+      :description="t('expenses.list_description')"
+      :buttonLabel="t('expenses.add_title')" 
       :onButtonClick="() => router.push('/expenses/add')" 
     />
 
@@ -62,7 +65,7 @@ const handleUpdate = (id: number) => {
       <div class="w-full md:max-w-sm">
         <UInput 
           v-model="search" 
-          placeholder="Search expenses..." 
+          :placeholder="t('expenses.search_hint')" 
           icon="heroicons-outline:search" 
           size="md"
           class="w-full"
@@ -113,9 +116,9 @@ const handleUpdate = (id: number) => {
         </div>
       </div>
 
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 py-2 px-2">
         <p class="text-xs text-gray-500 order-2 sm:order-1">
-          Showing {{ paginated.length }} of {{ filtered.length }} results
+          {{ t('common.showing') }} {{ paginated.length }} {{ t('common.of') }} {{ filtered.length }} {{ t('common.results') }}
         </p>
         <div class="order-1 sm:order-2">
           <UPagination v-model:page="page" :total="filtered.length" :items-per-page="pageSize" />
@@ -126,7 +129,6 @@ const handleUpdate = (id: number) => {
 </template>
 
 <style scoped>
-/* Optional: Custom scrollbar styles for a more modern look on Windows/Linux */
 .scrollbar-thin::-webkit-scrollbar {
   height: 6px;
 }

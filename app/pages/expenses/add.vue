@@ -1,10 +1,13 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard' });
-useHead({
-  title: 'Add Expense'
-})
+import { ref, reactive, onBeforeUpdate } from 'vue';
 
-import { ref, reactive, onMounted } from 'vue';
+definePageMeta({ layout: 'dashboard' });
+
+const { t } = useI18n();
+
+useHead({
+  title: t('expenses.add_title')
+})
 
 interface Expense {
   SellerID: number | null;
@@ -16,21 +19,18 @@ interface Expense {
 const isSubmitting = ref(false);
 const showSuccess = ref(false);
 
-// Form State
 const form = reactive<Expense>({
   SellerID: null,
   Details: '',
-  ExpenseDate: new Date().toISOString().split('T')[0]?? '',
+  ExpenseDate: new Date().toISOString().split('T')[0] ?? '',
   Amount: null
 });
 
-// Keyboard Navigation Logic
 const inputs = ref<HTMLElement[]>([]);
 const setInputRef = (el: any) => {
   if (el) inputs.value.push(el);
 };
 
-// Clear refs on update to prevent duplicates
 onBeforeUpdate(() => {
   inputs.value = [];
 });
@@ -47,7 +47,7 @@ const resetForm = () => {
   form.Details = '';
   form.ExpenseDate = new Date().toISOString().split('T')[0] ?? '';
   form.Amount = null;
-  inputs.value[0]?.focus(); // Return focus to first field
+  inputs.value[0]?.focus();
 };
 
 const handleSubmit = async () => {
@@ -55,7 +55,6 @@ const handleSubmit = async () => {
   isSubmitting.value = true;
   
   try {
-    // Simulated API Call
     await new Promise((resolve) => setTimeout(resolve, 800));
     showSuccess.value = true;
     resetForm();
@@ -71,9 +70,9 @@ const handleSubmit = async () => {
     <div class="max-w-3xl mx-auto">
       
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 class="text-2xl font-bold text-white">Add Expense</h1>
+        <h1 class="text-2xl font-bold text-white">{{ t('expenses.add_title') }}</h1>
         <NuxtLink to="/expenses" class="text-sm text-gray-400 hover:text-green-400 flex items-center">
-          <Icon name="heroicons-outline:arrow-left" class="mr-2" /> Back to List
+          <Icon name="heroicons-outline:arrow-left" class="me-2" /> {{ t('common.back_to_list') }}
         </NuxtLink>
       </div>
 
@@ -83,27 +82,27 @@ const handleSubmit = async () => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-400">Seller ID</label>
+              <label class="text-sm font-medium text-gray-400 ms-1">{{ t('expenses.seller_id') }}</label>
               <input 
                 :ref="setInputRef"
                 v-model.number="form.SellerID"
                 type="number"
                 required
-                placeholder="101"
+                :placeholder="t('expenses.placeholders.seller')"
                 @keydown.down.prevent="moveFocus(0, 'down')"
                 class="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-green-500/50 outline-none transition-all"
               />
             </div>
 
             <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-400">Amount</label>
+              <label class="text-sm font-medium text-gray-400 ms-1">{{ t('expenses.amount') }}</label>
               <input 
                 :ref="setInputRef"
                 v-model.number="form.Amount"
                 type="number"
                 step="0.01"
                 required
-                placeholder="0.00"
+                :placeholder="t('expenses.placeholders.amount')"
                 @keydown.down.prevent="moveFocus(1, 'down')"
                 @keydown.up.prevent="moveFocus(1, 'up')"
                 class="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-green-500/50 outline-none transition-all"
@@ -111,7 +110,7 @@ const handleSubmit = async () => {
             </div>
 
             <div class="flex flex-col gap-2 md:col-span-2">
-              <label class="text-sm font-medium text-gray-400">Date</label>
+              <label class="text-sm font-medium text-gray-400 ms-1">{{ t('expenses.date') }}</label>
               <input 
                 :ref="setInputRef"
                 v-model="form.ExpenseDate"
@@ -124,13 +123,13 @@ const handleSubmit = async () => {
             </div>
 
             <div class="flex flex-col gap-2 md:col-span-2">
-              <label class="text-sm font-medium text-gray-400">Details</label>
+              <label class="text-sm font-medium text-gray-400 ms-1">{{ t('expenses.details') }}</label>
               <textarea 
                 :ref="setInputRef"
                 v-model="form.Details"
                 rows="3"
                 required
-                placeholder="Enter description..."
+                :placeholder="t('expenses.placeholders.details')"
                 @keydown.up.prevent="moveFocus(3, 'up')"
                 class="w-full bg-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-green-500/50 outline-none resize-none"
               ></textarea>
@@ -138,13 +137,15 @@ const handleSubmit = async () => {
           </div>
 
           <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-6 border-t border-gray-800">
-            <p class="hidden sm:block text-xs text-gray-500">Press <span class="text-gray-300">Enter</span> to save</p>
+            <p class="hidden sm:block text-xs text-gray-500">
+              {{ t('common.enter_to_save') }}
+            </p>
             <button 
               type="submit" 
               :disabled="isSubmitting"
               class="w-full sm:w-auto bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white px-10 py-3 rounded-xl font-bold transition-all shadow-lg shadow-green-900/20"
             >
-              {{ isSubmitting ? 'Saving...' : 'Save Expense' }}
+              {{ isSubmitting ? t('common.saving') : t('expenses.save_btn') }}
             </button>
           </div>
         </form>

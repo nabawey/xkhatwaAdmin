@@ -1,12 +1,15 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard' });
-useHead({
-  title: 'Expenses'
-})
-
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+
+definePageMeta({ layout: 'dashboard' });
+
+const { t } = useI18n()
 const router = useRouter()
+
+useHead({
+  title: t('products.list_title')
+})
 
 interface Product {
   CategoryID: number
@@ -16,23 +19,20 @@ interface Product {
   StockQuantity: number
 }
 
+// Mock Data
 const products: Product[] = [
   { CategoryID: 1, CategoryName: 'Electronics', Description: 'Smartphone with 128GB storage', Price: 699.99, StockQuantity: 50 },
   { CategoryID: 2, CategoryName: 'Books', Description: 'Hardcover novel', Price: 19.99, StockQuantity: 120 },
   { CategoryID: 3, CategoryName: 'Clothing', Description: 'Cotton T-shirt', Price: 9.99, StockQuantity: 200 }
 ]
 
-/**
- * BEST PRACTICE: Define specific widths for columns that don't need much space.
- * 'class' property in Nuxt UI columns applies to <th> and <td>.
- */
 const columns = [
-  { accessorKey: 'CategoryID', header: 'ID', class: 'w-16' },
-  { accessorKey: 'CategoryName', header: 'Category', class: 'w-32 md:w-44' },
-  { accessorKey: 'Description', header: 'Description', class: 'min-w-[200px]' }, // Flexible column
-  { accessorKey: 'Price', header: 'Price', class: 'w-24 text-right' },
-  { accessorKey: 'StockQuantity', header: 'Stock', class: 'w-24 hidden lg:table-cell' }, // Hide on mobile/tablet
-  { accessorKey: 'actions', header: 'Actions', class: 'w-24 text-right' }
+  { accessorKey: 'CategoryID', header: t('expenses.id'), class: 'w-16' },
+  { accessorKey: 'CategoryName', header: t('products.category_name'), class: 'w-32 md:w-44' },
+  { accessorKey: 'Description', header: t('products.description'), class: 'min-w-[200px]' },
+  { accessorKey: 'Price', header: t('products.price'), class: 'w-24 text-right' },
+  { accessorKey: 'StockQuantity', header: t('products.stock'), class: 'w-24 hidden lg:table-cell' },
+  { accessorKey: 'actions', header: t('common.actions'), class: 'w-24 text-right' }
 ]
 
 const search = ref('')
@@ -51,25 +51,34 @@ const paginated = computed(() =>
 const handleUpdate = (id: number) => router.push(`/products/${id}`)
 
 const handleDelete = (id: number) => {
-  if (confirm('Delete product?')) console.log('Delete:', id)
+  if (confirm(t('products.confirm_delete'))) {
+    console.log('Delete Product:', id)
+    // Implement API delete call here
+  }
 }
 </script>
 
 <template>
   <div class="max-w-full space-y-6">
     <AppPageHeader 
-      title="Products"
-      description="Manage your catalog details, pricing, and inventory levels."
-      buttonLabel="Add Product" 
+      :title="t('products.list_title')"
+      :description="t('products.list_description')"
+      :buttonLabel="t('sidebar.add_product')" 
       :onButtonClick="() => router.push('/products/add')" 
     />
 
     <div class="space-y-4">
       <div class="max-w-xs">
-        <UInput v-model="search" placeholder="Search..." icon="heroicons-outline:search" />
+        <UInput 
+          v-model="search" 
+          :placeholder="t('common.search_placeholder')" 
+          icon="heroicons-outline:search" 
+          variant="outline"
+          class="rounded-xl"
+        />
       </div>
 
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl shadow-xl overflow-hidden">
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl shadow-xl overflow-hidden relative">
         <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
           <UTable 
             :data="paginated" 
@@ -97,12 +106,14 @@ const handleDelete = (id: number) => {
                 <button 
                   @click="handleUpdate(row.original.CategoryID)"
                   class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all"
+                  :title="t('common.update')"
                 >
                   <Icon name="heroicons:pencil-square" class="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <button 
                   @click="handleDelete(row.original.CategoryID)"
                   class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                  :title="t('common.close')"
                 >
                   <Icon name="heroicons:trash" class="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
@@ -114,17 +125,25 @@ const handleDelete = (id: number) => {
 
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
         <p class="text-xs text-gray-500 order-2 sm:order-1">
-          Showing {{ paginated.length }} of {{ filtered.length }} products
+          {{ t('common.showing') }} {{ paginated.length }} {{ t('common.of') }} {{ filtered.length }} {{ t('common.results') }}
         </p>
-        <UPagination v-model:page="page" :total="filtered.length" :items-per-page="pageSize" class="order-1 sm:order-2" />
+        <UPagination 
+          v-model:page="page" 
+          :total="filtered.length" 
+          :items-per-page="pageSize" 
+          class="order-1 sm:order-2" 
+        />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Ensure smooth horizontal scrolling on touch devices */
 .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
+}
+/* Subtle blue tint for active table rows on hover if needed */
+tr:hover td {
+  background-color: rgba(59, 130, 246, 0.02);
 }
 </style>

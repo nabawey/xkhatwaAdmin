@@ -1,0 +1,172 @@
+{
+  "common": {
+    "back": "رجوع",
+    "back_to_list": "العودة للقائمة",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "saving": "جاري الحفظ...",
+    "update": "تحديث",
+    "loading": "جاري التحميل...",
+    "close": "إغلاق",
+    "details": "التفاصيل",
+    "enter_to_save": "اضغط Enter للحفظ",
+    "search_placeholder": "بحث...",
+    "actions": "الإجراءات",
+    "showing": "عرض",
+    "of": "من أصل",
+    "results": "نتائج",
+    "confirm_clear": "هل أنت متأكد من رغبتك في مسح النموذج بالكامل؟",
+    "success_save": "تم الحفظ بنجاح!",
+    "discard": "تجاهل التغييرات",
+    "cleared_success": "تم مسح النموذج بنجاح!",
+    "arabic": "العربية",
+    "english": "الإنجليزية"
+  },
+  "sidebar": {
+    "dashboard": "لوحة القيادة",
+    "invoices": "الفواتير",
+    "invoices_list": "قائمة الفواتير",
+    "add_invoice": "إضافة فاتورة",
+    "restore_invoice": "استرجاع فاتورة",
+    "products": "المنتجات",
+    "product_list": "قائمة المنتجات",
+    "add_product": "إضافة منتج",
+    "expenses": "المصاريف",
+    "expense_list": "قائمة المصاريف",
+    "add_expense": "إضافة مصروف",
+    "sellers": "البائعين",
+    "settings": "الإعدادات"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "filter_date": "تصفية حسب التاريخ",
+    "products_label": "المنتجات",
+    "syncing": "جاري المزامنة...",
+    "live_trend": "اتجاه مباشر",
+    "revenue_performance": "أداء الإيرادات",
+    "order_volume": "حجم الطلبات",
+    "time_ranges": {
+      "day": "آخر يوم",
+      "week": "آخر أسبوع",
+      "month": "آخر شهر"
+    },
+    "metrics": {
+      "customers": "العملاء",
+      "conversions": "التحويلات",
+      "revenue": "الإيرادات",
+      "orders": "الطلبات"
+    },
+    "categories": {
+      "all": "جميع المنتجات",
+      "shoe_01": "حذاء ٠١",
+      "shoe_02": "حذاء ٠٢",
+      "apparel": "ملابس"
+    }
+  },
+  "invoices": {
+    "list_title": "الفواتير",
+    "list_description": "إدارة فواتير العملاء وسجل المعاملات.",
+    "add_title": "إضافة فاتورة",
+    "search_hint": "بحث في الفواتير...",
+    "customer": "العميل",
+    "total": "الإجمالي",
+    "items": "الأصناف",
+    "no_items": "لا توجد أصناف لهذه الفاتورة.",
+    "invoice_number": "فاتورة رقم #"
+  },
+  "billing": {
+    "new_invoice": "فاتورة جديدة",
+    "grand_total": "الإجمالي الكلي",
+    "customer_name": "اسم العميل",
+    "date": "التاريخ",
+    "seller": "البائع",
+    "product_id": "رقم المنتج",
+    "qty": "الكمية",
+    "unit_price": "سعر الوحدة",
+    "line_total": "إجمالي السطر",
+    "add_line": "إضافة بند جديد (أو اضغط +)",
+    "notes": "ملاحظات إضافية...",
+    "subtotal": "المجموع الفرعي",
+    "discount": "الخصم",
+    "total_payable": "إجمالي المستحق",
+    "save_invoice": "حفظ الفاتورة",
+    "clear_form": "مسح النموذج"
+  },
+  "restore": {
+    "title": "استرجاع فاتورة",
+    "total_label": "إجمالي المسترجع",
+    "submit_btn": "استرجاع الفاتورة",
+    "submitting": "جاري الاسترجاع...",
+    "success": "تم استرجاع الفاتورة بنجاح!"
+  },
+  "products": {
+    "list_title": "المنتجات",
+    "list_description": "إدارة تفاصيل الكتالوج، التسعير، ومستويات المخزون.",
+    "add_title": "إضافة منتج جديد",
+    "add_subtitle": "إنشاء عنصر جديد في المخزون",
+    "edit_title": "تعديل المنتج",
+    "edit_subtitle": "تعديل تفاصيل المخزون الحالي",
+    "category_name": "اسم الفئة",
+    "category_id": "رقم الفئة",
+    "category_id_opt": "رقم الفئة (اختياري)",
+    "price": "السعر",
+    "stock": "كمية المخزون",
+    "description": "الوصف",
+    "save_btn": "حفظ التغييرات",
+    "add_btn": "إضافة منتج",
+    "adding": "جاري الإضافة...",
+    "updating": "جاري التحديث...",
+    "success_add": "تم إضافة المنتج بنجاح!",
+    "success_update": "تم تحديث المنتج بنجاح!",
+    "confirm_delete": "هل أنت متأكد من رغبتك في حذف هذا المنتج؟",
+    "placeholders": {
+      "category": "مثال: إلكترونيات",
+      "description": "معلومات مفصلة عن المنتج..."
+    },
+    "validation": {
+      "name_required": "اسم الفئة مطلوب",
+      "price_min": "يجب أن يكون السعر أكبر من 0",
+      "stock_min": "لا يمكن أن يكون المخزون بالسالب"
+    }
+  },
+  "expenses": {
+    "list_title": "المصاريف",
+    "list_description": "تتبع نفقات عملك ومدفوعات البائعين.",
+    "add_title": "إضافة مصروف",
+    "edit_title": "تعديل المصروف",
+    "edit_subtitle": "تحديث سجل المعاملة رقم",
+    "id": "المعرف",
+    "seller_id": "رقم البائع",
+    "date": "التاريخ",
+    "amount": "المبلغ",
+    "details": "الوصف",
+    "save_btn": "حفظ المصروف",
+    "update_btn": "تحديث المصروفات",
+    "search_hint": "البحث في المصاريف...",
+    "placeholders": {
+      "details": "أدخل الوصف هنا...",
+      "seller": "١٠١",
+      "amount": "٠.٠٠"
+    },
+    "validation": {
+      "details_required": "التفاصيل مطلوبة",
+      "amount_required": "مبلغ صالح مطلوب",
+      "date_required": "التاريخ مطلوب",
+      "customer_required": "اسم العميل مطلوب.",
+      "product_required": "رقم المنتج مطلوب في السطر"
+    }
+  },
+  "settings": "الإعدادات",
+  "description": "إدارة تفضيلات حسابك ومظهر التطبيق.",
+  "appearance": "المظهر",
+  "language": "اللغة",
+  "theme": "السمة",
+  "light": "فاتح",
+  "dark": "داكن",
+  "info": "المعلومات الشخصية",
+  "name": "الاسم الكامل",
+  "save": "حفظ الإعدادات",
+  "discard": "تجاهل",
+  "success_msg": "تم حفظ الإعدادات بنجاح!",
+  "signout_confirm": "هل أنت متأكد من تسجيل الخروج؟"
+}

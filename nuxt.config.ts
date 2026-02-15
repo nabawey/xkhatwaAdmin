@@ -11,14 +11,30 @@ export default defineNuxtConfig({
   },
   modules: [
     '@nuxt/icon',
-    '@nuxt/ui'
+    '@nuxt/ui',
+    '@nuxtjs/i18n'
   ],
+  i18n: {
+    strategy: 'no_prefix',
+    defaultLocale: 'en',
+    langDir: 'locales',
+    locales: [
+      { code: 'en', iso: 'en-US', file: 'en.json', name: 'English', dir: 'ltr' },
+      { code: 'ar', iso: 'ar-EG', file: 'ar.json', name: 'Arabic', dir: 'rtl' }
+    ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root',
+      alwaysRedirect: true,
+    }
+  },
   vite: {
     plugins: [
       tailwindcss(),
     ],
   },
- app: {
+  app: {
     head: {
       title: 'X.Khatwa',
       titleTemplate: '%s | X.Khatwa',
@@ -30,5 +46,5 @@ export default defineNuxtConfig({
         { rel: 'icon', type: 'image/png', href: '/shoeIco.png' }
       ]
     }
-  }
+  },
 })

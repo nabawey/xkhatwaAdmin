@@ -1,0 +1,172 @@
+{
+  "common": {
+    "back": "Back",
+    "back_to_list": "Back to List",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "update": "Update",
+    "loading": "Loading...",
+    "close": "Close",
+    "details": "Details",
+    "enter_to_save": "Press Enter to save",
+    "search_placeholder": "Search...",
+    "actions": "Actions",
+    "showing": "Showing",
+    "of": "of",
+    "results": "results",
+    "confirm_clear": "Are you sure you want to clear the entire form?",
+    "success_save": "Saved Successfully!",
+    "discard": "Discard Changes",
+    "cleared_success": "Form cleared successfully!",
+    "arabic": "Arabic",
+    "english": "English"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "invoices": "Invoices",
+    "invoices_list": "Invoices List",
+    "add_invoice": "Add Invoice",
+    "restore_invoice": "Restore Invoice",
+    "products": "Products",
+    "product_list": "Product List",
+    "add_product": "Add Product",
+    "expenses": "Expenses",
+    "expense_list": "Expense List",
+    "add_expense": "Add Expense",
+    "sellers": "Sellers",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "filter_date": "Filter By Date",
+    "products_label": "Products",
+    "syncing": "Syncing...",
+    "live_trend": "Live Trend",
+    "revenue_performance": "Revenue Performance",
+    "order_volume": "Order Volume",
+    "time_ranges": {
+      "day": "Last Day",
+      "week": "Last Week",
+      "month": "Last Month"
+    },
+    "metrics": {
+      "customers": "Customers",
+      "conversions": "Conversions",
+      "revenue": "Revenue",
+      "orders": "Orders"
+    },
+    "categories": {
+      "all": "All Products",
+      "shoe_01": "Shoe 01",
+      "shoe_02": "Shoe 02",
+      "apparel": "Apparel"
+    }
+  },
+  "invoices": {
+    "list_title": "Invoices",
+    "list_description": "Manage customer billing and transaction history.",
+    "add_title": "Add Invoice",
+    "search_hint": "Search invoices...",
+    "customer": "Customer",
+    "total": "Total",
+    "items": "Items",
+    "no_items": "No items found for this invoice.",
+    "invoice_number": "Invoice #"
+  },
+  "billing": {
+    "new_invoice": "New Invoice",
+    "grand_total": "Grand Total",
+    "customer_name": "Customer Name",
+    "date": "Date",
+    "seller": "Seller",
+    "product_id": "Product ID",
+    "qty": "Qty",
+    "unit_price": "Unit Price",
+    "line_total": "Line Total",
+    "add_line": "Add Line Item (or press + on keyboard)",
+    "notes": "Additional notes...",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "total_payable": "Total Payable",
+    "save_invoice": "Save Invoice",
+    "clear_form": "Clear Form"
+  },
+  "restore": {
+    "title": "Restore Invoice",
+    "total_label": "Restore Total",
+    "submit_btn": "Restore Invoice",
+    "submitting": "Restoring...",
+    "success": "Invoice Restored Successfully!"
+  },
+  "products": {
+    "list_title": "Products",
+    "list_description": "Manage your catalog details, pricing, and inventory levels.",
+    "add_title": "Add New Product",
+    "add_subtitle": "Create a new item in your inventory",
+    "edit_title": "Update Product",
+    "edit_subtitle": "Modify existing inventory details",
+    "category_name": "Category Name",
+    "category_id": "Category ID",
+    "category_id_opt": "Category ID (Optional)",
+    "price": "Price",
+    "stock": "Stock Quantity",
+    "description": "Description",
+    "save_btn": "Save Changes",
+    "add_btn": "Add Product",
+    "adding": "Adding...",
+    "updating": "Updating...",
+    "success_add": "Product successfully added to catalog!",
+    "success_update": "Product updated successfully! Redirecting...",
+    "confirm_delete": "Are you sure you want to delete this product?",
+    "placeholders": {
+      "category": "e.g. Electronics",
+      "description": "Detailed product information..."
+    },
+    "validation": {
+      "name_required": "Category name is required",
+      "price_min": "Price must be greater than 0",
+      "stock_min": "Stock cannot be negative"
+    }
+  },
+  "expenses": {
+    "list_title": "Expenses",
+    "list_description": "Track your business spending and seller payments.",
+    "add_title": "Add Expense",
+    "edit_title": "Edit Expense",
+    "edit_subtitle": "Update transaction record",
+    "id": "ID",
+    "seller_id": "Seller ID",
+    "date": "Expense Date",
+    "amount": "Amount",
+    "details": "Description",
+    "save_btn": "Save Expense",
+    "update_btn": "Update Expense",
+    "search_hint": "Search expenses...",
+    "placeholders": {
+      "details": "Enter description...",
+      "seller": "101",
+      "amount": "0.00"
+    },
+    "validation": {
+      "details_required": "Details are required",
+      "amount_required": "Valid amount required",
+      "date_required": "Date is required",
+      "customer_required": "Customer Name is required.",
+      "product_required": "Product ID is required on row"
+    }
+  },
+  "settings": "Settings",
+  "description": "Manage your account preferences and application look.",
+  "appearance": "Appearance",
+  "language": "Language",
+  "theme": "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "info": "Personal Info",
+  "name": "Full Name",
+  "save": "Save Settings",
+  "discard": "Discard",
+  "success_msg": "Settings saved successfully!",
+  "signout_confirm": "Are you sure you want to sign out?"
+}

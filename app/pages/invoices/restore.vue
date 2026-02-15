@@ -1,9 +1,14 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'dashboard' });
-useHead({
-  title: 'Restore Invoice'
-})
 import { ref, reactive, computed, onBeforeUpdate, nextTick } from 'vue';
+
+definePageMeta({ layout: 'dashboard' });
+
+const { t } = useI18n();
+const toast = useToast();
+
+useHead({
+  title: t('sidebar.restore_invoice')
+})
 
 interface Invoice {
   CustomerName: string;
@@ -18,7 +23,6 @@ interface InvoiceDetail {
   UnitPrice: number;
 }
 
-// --- Defaults for Resetting ---
 const getInitialHeader = (): Invoice => ({
   CustomerName: '',
   InvoiceDate: new Date().toISOString().split('T')[0] ?? '',
@@ -30,22 +34,17 @@ const getInitialDetails = (): InvoiceDetail[] => [
   { ProductID: null, Quantity: 1, UnitPrice: 0 }
 ];
 
-// --- State ---
 const header = reactive<Invoice>(getInitialHeader());
 const details = ref<InvoiceDetail[]>(getInitialDetails());
 const errors = ref<string[]>([]);
 const isSubmitting = ref(false);
 
-// --- Product Database Logic ---
 const productDb: Record<number, number> = { 1: 50, 2: 100, 3: 150 };
 
 const updatePrice = (index: number) => {
   const row = details.value[index];
   if (!row) return;
-
-  // Enforce ProductID >= 1
   if (row.ProductID !== null && row.ProductID < 1) row.ProductID = 1;
-
   if (row.ProductID && productDb[row.ProductID]) {
     row.UnitPrice = productDb[row.ProductID] ?? 0;
   } else {
@@ -53,7 +52,6 @@ const updatePrice = (index: number) => {
   }
 };
 
-// --- Input Sanitation ---
 const enforceMinQuantity = (index: number) => {
   const row = details.value[index];
   if (!row) return;
@@ -64,7 +62,6 @@ const enforceMinDiscount = () => {
   if (header.Discount < 0) header.Discount = 0;
 };
 
-// --- Form Actions ---
 const resetForm = () => {
   Object.assign(header, getInitialHeader());
   details.value = getInitialDetails();
@@ -72,12 +69,10 @@ const resetForm = () => {
 };
 
 const handleClearForm = () => {
-  if (confirm("Are you sure you want to clear the entire form?")) {
-    resetForm();
-  }
+  resetForm();
+  toast.add({ title: t('common.cleared_success'), color: 'success' });
 };
 
-// --- Keyboard Navigation ---
 const inputs = ref<HTMLElement[]>([]);
 const setInputRef = (el: any) => { if (el) inputs.value.push(el); };
 onBeforeUpdate(() => { inputs.value = []; });
@@ -87,7 +82,7 @@ const handleNav = (index: number, e: KeyboardEvent) => {
     e.preventDefault();
     addRow();
     nextTick(() => {
-      const newRowInputIndex = inputs.value.length - 2; 
+      const newRowInputIndex = inputs.value.length - 2;
       inputs.value[newRowInputIndex]?.focus();
     });
     return;
@@ -119,7 +114,6 @@ const handleNav = (index: number, e: KeyboardEvent) => {
   }
 };
 
-// --- Calculations ---
 const subtotal = computed(() => details.value.reduce((acc, row) => acc + (row.Quantity * row.UnitPrice), 0));
 const totalPrice = computed(() => Math.max(0, subtotal.value - header.Discount));
 
@@ -131,12 +125,11 @@ const removeRow = (index: number) => {
   if (details.value.length > 1) details.value.splice(index, 1);
 };
 
-// --- Submission ---
 const validateForm = () => {
   errors.value = [];
-  if (!header.CustomerName.trim()) errors.value.push("Customer Name is required.");
+  if (!header.CustomerName.trim()) errors.value.push(t('expenses.validation.customer_required'));
   details.value.forEach((item, idx) => {
-    if (!item.ProductID) errors.value.push(`Row ${idx + 1}: Product ID is required.`);
+    if (!item.ProductID) errors.value.push(`${t('expenses.validation.product_required')} ${idx + 1}`);
   });
   return errors.value.length === 0;
 };
@@ -144,12 +137,27 @@ const validateForm = () => {
 const submitInvoice = async () => {
   if (!validateForm()) return;
   isSubmitting.value = true;
+
   try {
-    await new Promise(r => setTimeout(r, 1000)); // Simulate API
-    alert("Invoice Saved Successfully!");
-    resetForm(); // Requirement #1: Clear after submit
+    // Simulate API call
+    await new Promise(r => setTimeout(r, 1000));
+
+    // Success Toast
+    toast.add({
+      title: t('restore.success'), // Using the specific restore success key
+      icon: 'i-heroicons-check-circle',
+      color: 'success',
+    });
+
+    resetForm();
   } catch (e) {
-    errors.value.push("Failed to save invoice.");
+    // Error Toast
+    toast.add({
+      title: t('common.error_occurred'),
+      description: "Failed to restore invoice. Please try again.",
+      icon: 'i-heroicons-exclamation-circle',
+      color: 'error'
+    });
   } finally {
     isSubmitting.value = false;
   }
@@ -160,9 +168,9 @@ const submitInvoice = async () => {
   <div class="bg-black text-gray-200 p-4 sm:p-8">
     <div class="max-w-6xl mx-auto">
       <div class="mb-8 flex justify-between items-end">
-        <h1 class="text-3xl font-bold text-red-500 tracking-tight">Restore Invoice</h1>
+        <h1 class="text-3xl font-bold text-red-500 tracking-tight">{{ t('restore.title') }}</h1>
         <div class="text-right">
-          <p class="text-sm text-gray-500 uppercase font-semibold tracking-wider">Restore Total</p>
+          <p class="text-sm text-gray-500 uppercase font-semibold tracking-wider">{{ t('restore.total_label') }}</p>
           <p class="text-4xl font-mono font-bold text-red-400">-${{ totalPrice.toFixed(2) }}</p>
         </div>
       </div>
@@ -176,49 +184,55 @@ const submitInvoice = async () => {
       <form @submit.prevent="submitInvoice" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-900 p-6 rounded-2xl border border-gray-800">
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-gray-500 tracking-wider">CUSTOMER NAME</label>
+            <label class="text-xs font-bold text-gray-500 tracking-wider uppercase">{{ t('billing.customer_name')
+            }}</label>
             <input :ref="setInputRef" v-model="header.CustomerName" type="text" @keydown="handleNav(0, $event)"
-              class="bg-black border border-gray-700 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-green-500 outline-none transition-all" />
+              class="bg-black border border-gray-700 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-red-500 outline-none transition-all" />
           </div>
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-gray-500 tracking-wider">DATE</label>
+            <label class="text-xs font-bold text-gray-500 tracking-wider uppercase">{{ t('billing.date') }}</label>
             <input :ref="setInputRef" v-model="header.InvoiceDate" type="date" @keydown="handleNav(1, $event)"
-              class="bg-black border border-gray-700 rounded-lg px-4 py-2.5 scheme-dark focus:ring-2 focus:ring-green-500 outline-none" />
+              class="bg-black border border-gray-700 rounded-lg px-4 py-2.5 [color-scheme:dark] focus:ring-2 focus:ring-red-500 outline-none" />
           </div>
           <div class="flex flex-col gap-2">
-            <label class="text-xs font-bold text-gray-500 tracking-wider">SELLER</label>
-            <input value="Mohamed Nabwey" disabled class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed" />
+            <label class="text-xs font-bold text-gray-500 tracking-wider uppercase">{{ t('billing.seller') }}</label>
+            <input value="Mohamed Nabwey" disabled
+              class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed" />
           </div>
         </div>
 
         <div class="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden shadow-xl">
           <div class="overflow-x-auto">
-            <table class="w-full min-w-150">
-              <thead class="bg-black/40 text-left">
-                <tr class="text-xs font-bold text-gray-500 border-b border-gray-800 uppercase tracking-widest">
-                  <th class="px-6 py-4">Product ID</th>
-                  <th class="px-6 py-4">Qty</th>
-                  <th class="px-6 py-4">Unit Price</th>
-                  <th class="px-6 py-4 text-right">Line Total</th>
+            <table class="w-full min-w-[600px]">
+              <thead class="bg-black/40">
+                <tr
+                  class="text-xs font-bold text-gray-500 border-b border-gray-800 uppercase tracking-widest text-start">
+                  <th class="px-6 py-4">{{ t('billing.product_id') }}</th>
+                  <th class="px-6 py-4">{{ t('billing.qty') }}</th>
+                  <th class="px-6 py-4">{{ t('billing.unit_price') }}</th>
+                  <th class="px-6 py-4 text-right">{{ t('billing.line_total') }}</th>
                   <th class="px-6 py-4 w-10"></th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, idx) in details" :key="idx" class="border-b border-gray-800/50 last:border-0 hover:bg-white/5 transition-colors">
-                  <td class="px-4 py-3">
+                <tr v-for="(row, idx) in details" :key="idx"
+                  class="border-b border-gray-800/50 last:border-0 hover:bg-white/5 transition-colors">
+                  <td class="px-4 py-3 text-start">
                     <input :ref="setInputRef" v-model.number="row.ProductID" type="number" min="1"
                       @input="updatePrice(idx)" @keydown="handleNav(2 + (idx * 2), $event)"
-                      class="w-full bg-black border border-gray-700 rounded-lg px-3 py-2 focus:border-green-500 outline-none" />
+                      class="w-full bg-black border border-gray-700 rounded-lg px-3 py-2 focus:border-red-500 outline-none" />
                   </td>
-                  <td class="px-4 py-3">
+                  <td class="px-4 py-3 text-start">
                     <input :ref="setInputRef" v-model.number="row.Quantity" type="number" min="1"
                       @input="enforceMinQuantity(idx)" @keydown="handleNav(2 + (idx * 2) + 1, $event)"
-                      class="w-full bg-black border border-gray-700 rounded-lg px-3 py-2 focus:border-green-500 outline-none" />
+                      class="w-full bg-black border border-gray-700 rounded-lg px-3 py-2 focus:border-red-500 outline-none" />
                   </td>
-                  <td class="px-6 py-3 text-gray-500 font-mono italic">${{ row.UnitPrice.toFixed(2) }}</td>
-                  <td class="px-6 py-3 font-bold text-gray-300 font-mono text-right">${{ (row.Quantity * row.UnitPrice).toFixed(2) }}</td>
+                  <td class="px-6 py-3 text-gray-500 font-mono italic text-start">${{ row.UnitPrice.toFixed(2) }}</td>
+                  <td class="px-6 py-3 font-bold text-gray-300 font-mono text-right">${{ (row.Quantity *
+                    row.UnitPrice).toFixed(2) }}</td>
                   <td class="px-4 py-3">
-                    <button type="button" @click="removeRow(idx)" class="p-2 text-gray-600 hover:text-red-500 transition-colors">
+                    <button type="button" @click="removeRow(idx)"
+                      class="p-2 text-gray-600 hover:text-red-500 transition-colors">
                       <Icon name="heroicons-outline:trash" class="w-5 h-5" />
                     </button>
                   </td>
@@ -226,45 +240,48 @@ const submitInvoice = async () => {
               </tbody>
             </table>
           </div>
-          <button type="button" @click="addRow" class="w-full py-4 bg-gray-800/30 hover:bg-gray-800 text-sm text-gray-400 border-t border-gray-800 transition-colors">
-            + Add Line Item (or press + on keyboard)
+          <button type="button" @click="addRow"
+            class="w-full py-4 bg-gray-800/30 hover:bg-gray-800 text-sm text-gray-400 border-t border-gray-800 transition-colors">
+            + {{ t('billing.add_line') }}
           </button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          <textarea v-model="header.Notes" placeholder="Additional notes..." class="w-full bg-gray-900 border border-gray-800 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-green-500/50 h-86 resize-none transition-all"></textarea>
-          
+          <textarea v-model="header.Notes" :placeholder="t('billing.notes')"
+            class="w-full bg-gray-900 border border-gray-800 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-red-500/50 h-[340px] resize-none transition-all"></textarea>
+
           <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
             <div class="flex justify-between items-center text-sm">
-              <span class="text-gray-400 font-semibold uppercase tracking-wider">Subtotal</span>
+              <span class="text-gray-400 font-semibold uppercase tracking-wider">{{ t('billing.subtotal') }}</span>
               <span class="font-mono text-white tracking-tight text-lg">${{ subtotal.toFixed(2) }}</span>
             </div>
 
             <div class="flex justify-between items-center group">
-              <span class="text-sm text-red-500 font-bold uppercase tracking-widest">Discount</span>
+              <span class="text-sm text-red-500 font-bold uppercase tracking-widest">{{ t('billing.discount') }}</span>
               <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-red-500 font-bold">$</span>
+                <span class="absolute inset-inline-start-3 top-1/2 -translate-y-1/2 text-red-500 font-bold">$</span>
                 <input :ref="setInputRef" v-model.number="header.Discount" type="number" min="0"
                   @input="enforceMinDiscount" @keydown="handleNav(inputs.length - 1, $event)"
-                  class="w-32 bg-black border border-red-900/50 rounded-lg pl-6 pr-3 py-1.5 text-right text-red-500 font-bold focus:ring-2 focus:ring-red-500 outline-none transition-all" />
+                  class="w-32 bg-black border border-red-900/50 rounded-lg ps-6 pe-3 py-1.5 text-right text-red-500 font-bold focus:ring-2 focus:ring-red-500 outline-none transition-all" />
               </div>
             </div>
 
             <div class="pt-4 border-t border-gray-800 flex justify-between items-center">
-              <span class="font-bold text-white text-lg uppercase tracking-wider">Total Payable</span>
+              <span class="font-bold text-white text-lg uppercase tracking-wider">{{ t('billing.total_payable')
+              }}</span>
               <span class="text-3xl font-bold text-green-400 font-mono">${{ totalPrice.toFixed(2) }}</span>
             </div>
 
             <div class="space-y-3 pt-2">
               <button type="submit" :disabled="isSubmitting"
-                class="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest">
-                <Icon v-if="isSubmitting" name="svg-spinners:180-ring" class="mr-2" />
-                {{ isSubmitting ? 'Restoring...' : 'Restore Invoice' }}
+                class="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest flex items-center justify-center">
+                <Icon v-if="isSubmitting" name="svg-spinners:180-ring" class="me-2" />
+                {{ isSubmitting ? t('restore.submitting') : t('restore.submit_btn') }}
               </button>
-              
+
               <button type="button" @click="handleClearForm"
                 class="w-full py-3 bg-transparent border border-gray-700 hover:border-red-500 hover:text-red-500 text-gray-500 font-semibold rounded-xl transition-all uppercase tracking-widest">
-                Clear Form
+                {{ t('billing.clear_form') }}
               </button>
             </div>
           </div>
@@ -273,13 +290,3 @@ const submitInvoice = async () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Hide arrows for number inputs to keep the UI clean */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-</style>
