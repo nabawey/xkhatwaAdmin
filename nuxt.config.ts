@@ -12,8 +12,19 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/icon',
     '@nuxt/ui',
-    '@nuxtjs/i18n'
+    '@nuxtjs/i18n',
+    '@nuxtjs/supabase',
   ],
+  supabase: {
+    redirectOptions: {
+      login: '/login',
+      callback: '/confirm',
+      exclude: ['/login'],
+    }
+  },
+  future: {
+    compatibilityVersion: 4,
+  },
   i18n: {
     strategy: 'no_prefix',
     defaultLocale: 'en',

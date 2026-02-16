@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useProfile } from '~/composables/useProfile';
 
-const { t } = useI18n(); // 1. Access translation function
+const { t } = useI18n();
+
+const { profile } = useProfile();
 
 const isCollapsed = ref(false);
 const isMobileOpen = ref(false);
@@ -51,11 +54,11 @@ const toggleExpenses = () => (isExpensesOpen.value = !isExpensesOpen.value);
 
       <div class="px-6 py-4 flex items-center border-b border-gray-800 transition-all duration-300 ease-in-out"
         :class="isCollapsed ? 'justify-center' : ''">
-        <img src="/mn.jpg" alt="User Avatar" class="h-10 w-10 rounded-full flex-shrink-0" />
+        <img :src="profile?.imageUrl || '/avatar.svg'" alt="User Avatar" class="h-10 w-10 rounded-full flex-shrink-0" />
         <NuxtLink to="/settings">
           <span v-if="!isCollapsed"
             class="ml-3 font-medium whitespace-nowrap text-gray-200 hover:text-green-400 truncate">
-            Mohamed Nabwey
+            {{ profile?.userName ?? 'Default User' }}
           </span>
         </NuxtLink>
       </div>
@@ -71,7 +74,8 @@ const toggleExpenses = () => (isExpensesOpen.value = !isExpensesOpen.value);
           <button @click="toggleInvoices"
             class="flex items-center w-full px-3 py-2 rounded-md hover:bg-gray-800 group transition-colors focus:outline-none">
             <Icon name="heroicons-outline:document-text" class="w-6 h-6 mr-3 group-hover:text-green-400" />
-            <span v-if="!isCollapsed" class="flex-1 text-left group-hover:text-green-400">{{ t('sidebar.invoices') }}</span>
+            <span v-if="!isCollapsed" class="flex-1 text-left group-hover:text-green-400">{{ t('sidebar.invoices')
+              }}</span>
             <Icon v-if="!isCollapsed"
               :name="isInvoicesOpen ? 'heroicons-outline:chevron-up' : 'heroicons-outline:chevron-down'"
               class="w-4 h-4 text-gray-400 ml-auto transition-transform" />
@@ -99,7 +103,8 @@ const toggleExpenses = () => (isExpensesOpen.value = !isExpensesOpen.value);
           <button @click="toggleProducts"
             class="flex items-center w-full px-3 py-2 rounded-md hover:bg-gray-800 group transition-colors focus:outline-none">
             <Icon name="heroicons-outline:shopping-bag" class="w-6 h-6 mr-3 group-hover:text-green-400" />
-            <span v-if="!isCollapsed" class="flex-1 text-left group-hover:text-green-400">{{ t('sidebar.products') }}</span>
+            <span v-if="!isCollapsed" class="flex-1 text-left group-hover:text-green-400">{{ t('sidebar.products')
+              }}</span>
             <Icon v-if="!isCollapsed"
               :name="isProductsOpen ? 'heroicons-outline:chevron-up' : 'heroicons-outline:chevron-down'"
               class="w-4 h-4 text-gray-400 ml-auto transition-transform" />
@@ -122,7 +127,8 @@ const toggleExpenses = () => (isExpensesOpen.value = !isExpensesOpen.value);
           <button @click="toggleExpenses"
             class="flex items-center w-full px-3 py-2 rounded-md hover:bg-gray-800 group transition-colors focus:outline-none">
             <Icon name="heroicons-outline:currency-dollar" class="w-6 h-6 mr-3 group-hover:text-green-400" />
-            <span v-if="!isCollapsed" class="flex-1 text-left group-hover:text-green-400">{{ t('sidebar.expenses') }}</span>
+            <span v-if="!isCollapsed" class="flex-1 text-left group-hover:text-green-400">{{ t('sidebar.expenses')
+              }}</span>
             <Icon v-if="!isCollapsed"
               :name="isExpensesOpen ? 'heroicons-outline:chevron-up' : 'heroicons-outline:chevron-down'"
               class="w-4 h-4 text-gray-400 ml-auto transition-transform" />
